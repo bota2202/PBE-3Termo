@@ -11,6 +11,7 @@ use App\Filament\Resources\Pedidos\Schemas\PedidoInfolist;
 use App\Filament\Resources\Pedidos\Tables\PedidosTable;
 use App\Models\Pedido;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -25,6 +26,11 @@ use Filament\Actions\DeleteBulkAction;
 
 class PedidoResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = "Pedidos";
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Pedidos';
+    protected static ?string $modelLabel = 'Pedido';
+    protected static ?string $pluralModelLabel = 'Pedidos';
     protected static ?string $model = Pedido::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;

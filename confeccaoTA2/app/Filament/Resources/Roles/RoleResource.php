@@ -15,12 +15,18 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 
 class RoleResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = "Permissões";
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Cargo';
+    protected static ?string $modelLabel = 'Cargo';
+    protected static ?string $pluralModelLabel = 'Cargos';
     protected static ?string $model = Role::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static ?string $recordTitleAttribute = 'Cargos e funções';

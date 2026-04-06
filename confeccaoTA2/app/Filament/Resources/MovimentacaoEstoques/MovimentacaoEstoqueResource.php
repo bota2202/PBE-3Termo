@@ -15,9 +15,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use UnitEnum;
 
 class MovimentacaoEstoqueResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = "Estoque";
+    protected static ?int $navigationSort = 3;
     protected static ?string $model = MovimentacaoEstoque::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
