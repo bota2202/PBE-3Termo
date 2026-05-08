@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Pokemon;
 use App\Models\CustomPokemon;
+use App\Models\DiscoveredPokemon;
 
 class PokemonController extends Controller
 {
@@ -13,7 +14,7 @@ class PokemonController extends Controller
      * Tela principal: exibe um pokémon aleatório (ou buscado/favorito),
      * junto com a lista de favoritos.
      */
-    public function index(Request $request)
+    public function aleatorio(Request $request)
     {
         $favoritos   = Pokemon::latest()->get();
         $customTotal = CustomPokemon::count();
@@ -41,7 +42,8 @@ class PokemonController extends Controller
                 $busca = rand(1, 1025);
             } else {
                 $pokemon = $custom->toPokeApiFormat();
-                return view('pokemon', compact('pokemon', 'favoritos'));
+                $this->unlockPokemon($pokemon);
+                return view('aleatorio', compact('pokemon', 'favoritos'));
             }
         }
 
@@ -59,10 +61,41 @@ class PokemonController extends Controller
                 $pokemon['description'] = null;
             }
 
-            return view('pokemon', compact('pokemon', 'favoritos'));
+            $this->unlockPokemon($pokemon);
+            return view('aleatorio', compact('pokemon', 'favoritos'));
         }
 
-        return redirect()->route('pokedex')->with('erro', 'Pokémon não encontrado!');
+        return redirect()->route('aleatorio')->with('erro', 'Pokémon não encontrado!');
+    }
+
+    /**
+     * Tela da Pokédex: mostra todos os slots e desbloqueia via página aleatória.
+     */
+    public function pokedex()
+    {
+        $customTotal = CustomPokemon::count();
+        $maxId       = 1025 + $customTotal;
+
+        $descobertos = DiscoveredPokemon::all()->keyBy('pokemon_api_id');
+        $slots = [];
+
+        for ($id = 1; $id <= $maxId; $id++) {
+            $poke = $descobertos->get($id);
+            $slots[] = [
+                'id' => $id,
+                'unlocked' => (bool) $poke,
+                'name' => $poke?->name,
+                'image' => $poke?->image,
+            ];
+        }
+
+        return view('pokedex', compact('slots'));
+    }
+
+    public function favoritos()
+    {
+        $favoritos = Pokemon::latest()->get();
+        return view('favoritos', compact('favoritos'));
     }
 
     public function salvar(Request $request)
@@ -124,7 +157,20 @@ class PokemonController extends Controller
             'abilities'   => $request->abilities,
         ]);
 
-        return redirect()->route('pokedex', ['pokemon' => $custom->custom_id])
+        return redirect()->route('aleatorio', ['pokemon' => $custom->custom_id])
             ->with('sucesso', "Pokémon '{$custom->name}' cadastrado! ID: #{$custom->custom_id}");
+    }
+
+    private function unlockPokemon(array $pokemon): void
+    {
+        $image = $pokemon['sprites']['other']['official-artwork']['front_default'] ?? null;
+
+        DiscoveredPokemon::updateOrCreate(
+            ['pokemon_api_id' => $pokemon['id']],
+            [
+                'name' => $pokemon['name'],
+                'image' => $image,
+            ]
+        );
     }
 }
